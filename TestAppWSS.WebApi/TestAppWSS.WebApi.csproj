@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TestAppWSS.DAL\TestAppWSS.DAL.csproj" />
+    <ProjectReference Include="..\TestAppWSS.Services\TestAppWSS.Services.csproj" />
   </ItemGroup>
 
   <ItemGroup>

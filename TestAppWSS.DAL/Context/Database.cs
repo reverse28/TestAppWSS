@@ -15,7 +15,13 @@ namespace TestAppWSS.DAL
 
         protected override void OnModelCreating(ModelBuilder db)
         {
-            base.OnModelCreating(db);
+            db.Entity<Node>(entity =>
+            {
+                entity.HasKey(x => x.Id);
+                entity.HasMany(x => x.Children)
+                    .WithOne(x => x.Parent)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
         }
     }
 }

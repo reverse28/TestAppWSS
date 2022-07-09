@@ -1,6 +1,7 @@
 using TestAppWSS.DAL;
 using Microsoft.EntityFrameworkCore;
-
+using TestAppWSS.Services.Interfaces;
+using TestAppWSS.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,8 +24,18 @@ switch (database_type)
         break;
 }
 
+builder.Services.AddTransient<IDbInitializer, DbInitializer>();
+
 
 var app = builder.Build();
+
+
+//инициализируем базу данных
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var db_initializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+    await db_initializer.InitializeAsync(RemoveBefore: false);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

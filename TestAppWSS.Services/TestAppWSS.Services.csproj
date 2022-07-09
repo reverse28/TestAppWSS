@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TestAppWSS.DAL\TestAppWSS.DAL.csproj" />
+    <ProjectReference Include="..\TestAppWSS.Domain\TestAppWSS.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
