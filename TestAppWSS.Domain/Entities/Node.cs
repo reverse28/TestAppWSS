@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using TestAppWSS.Domain.Entities.Base;
 
-namespace TestAppWSS.Domain
+namespace TestAppWSS.Domain.Entities
 {
     public class Node: Entity
     {
