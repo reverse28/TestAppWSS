@@ -4,6 +4,8 @@ namespace TestAppWSS.Services.Interfaces
 {
     public interface INodeData
     {
+        public List<Node> GetNodesList();
+
         public Node? AddNode(string name, int? pid);
 
         public bool Delete(int? id);

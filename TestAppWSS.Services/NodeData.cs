@@ -164,18 +164,18 @@ namespace TestAppWSS.Services
         }
 
         // Получить весь список
-        private async Task<List<Node>> GetNodesList()
+        public List<Node> GetNodesList()
         {
             List<Node> nodesList = new List<Node>();
-            await _dbContext.Departments.LoadAsync();
-            var rootNodes = await _dbContext.Departments.Where(n => n.Depth == 1).ToListAsync();
+            _dbContext.Departments.Load();
+            var rootNodes = _dbContext.Departments.Where(n => n.Depth == 1).ToList();
 
             rootNodes = rootNodes.OrderByDescending(n => n.Name).ToList();
             foreach (var node in rootNodes)
             {
                 // Add all roots with children
                 nodesList.Add(node);
-                ToNodesList(nodesList);
+                nodesList=ToNodesList(nodesList);
             }
 
             return nodesList;
