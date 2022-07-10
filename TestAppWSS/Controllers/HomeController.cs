@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Diagnostics;
+using TestAppWSS.Domain.Entities;
 using TestAppWSS.Models;
 using TestAppWSS.Services.Interfaces;
 
@@ -7,13 +9,200 @@ namespace TestAppWSS.Controllers
 {
     public class HomeController : Controller
     {
+        INodeData _NodeData;
 
-        public IActionResult Index([FromServices] INodeData NodeData)
+
+        public HomeController([FromServices] INodeData NodeData)
         {
-            var deprtments = NodeData.GetNodesList();
+            _NodeData = NodeData;
+        }
+
+        public IActionResult Index()
+        {
+            var deprtments = _NodeData.GetNodesList();
 
             return View(deprtments);
         }
+
+
+
+        [HttpGet("Home/Add/{pid?}")]
+        public  IActionResult Add(int? pid)
+        {
+            if (pid == null)
+                return NotFound();
+
+            // When not adding new root
+            if (pid != 0)
+            {
+                var node = _NodeData.GetById(pid);
+
+                if (node == null)
+                    return NotFound();
+
+                ViewData["Pid"] = node.Id;
+                ViewData["Path"] = _NodeData.GeneratePath(node);
+            }
+            // When adding new root
+            else
+            {
+                ViewData["Pid"] = null;
+                ViewData["Path"] = "/";
+            }
+
+            return View();
+        }
+
+        [HttpPost("Home/Add/{pid?}")]
+        public IActionResult Add([Bind("Name", "ParentId")] Node node)
+        {
+            if (ModelState.IsValid)
+            {
+                // Set new "Depth" for node
+                if (node.ParentId == null)
+                    node.Depth = 1;
+                else
+                {
+                    var parentDepth =  _NodeData.GetById(node.ParentId);
+                    if (parentDepth == null)
+                        return NotFound();
+                    node.Depth = parentDepth.Depth + 1;
+                }
+                _NodeData.AddNode(node);
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Get new ViewData if modelState is not valid
+            if (node.ParentId != 0)
+            {
+                node = _NodeData.GetById(node.ParentId);
+
+                if (node == null)
+                    return NotFound();
+
+                ViewData["Pid"] = node.Id;
+                ViewData["Path"] = _NodeData.GeneratePath(node);
+            }
+            // When adding new root
+            else
+            {
+                ViewData["Pid"] = null;
+                ViewData["Path"] = "/";
+            }
+
+            return View(node);
+        }
+
+
+
+        [Route("Home/Delete/{id?}")]
+        public IActionResult Delete(int? id)
+        {
+            // Don't allow to remove root
+            if (id == null || id == 0)
+                return NotFound();
+
+            var node = _NodeData.GetById(id);
+
+            return View(node);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [Route("Home/Delete/{id?}")]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            if (id == 0)
+                return NotFound();
+
+            _NodeData.Delete(id);
+
+            return RedirectToAction(nameof(Index));
+        }
+
+
+        [Route("Home/Edit/{id?}")]
+        public IActionResult Edit(int? id)
+        {
+            if (id == null || id == 0)
+            {
+                return NotFound();
+            }
+            var node = _NodeData.GetById(id);
+            return View(node);
+        }
+
+        [HttpPost]
+        [Route("Home/Edit/{id?}")]
+        public IActionResult Edit(int id, string name)
+        {
+            var node = _NodeData.GetById(id);
+
+            if (ModelState.IsValid)
+            {
+                node!.Name = name;
+                _NodeData.Edit(node);
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(node);
+        }
+
+
+        [Route("Home/Move/{id?}")]
+        public IActionResult Move(int? id)
+        {
+            if (id == null || id == 0)
+                return NotFound();
+
+            var node = _NodeData.GetById(id);
+
+             // Создаем список для выбора новго родителя, в списке отсутвуют дочерние элементы узла
+            var selectList = _NodeData.GetNodesList().Where(n => n.Id != id).ToList();
+            selectList = _NodeData.RemoveChildrenFromList(selectList, node!);
+            selectList.Insert(0, new Node
+            {
+                Id = 0,
+                Name = "/.",
+                Depth = 0
+            });
+
+            ViewData["Parents"] = new SelectList(selectList, "Id", "Name");
+
+            return View(node);
+        }
+
+        [HttpPost]
+        [Route("Home/Move/{id?}")]
+        public IActionResult Move(int id, int parentId)
+        {
+            var node = _NodeData.GetById(id);
+          
+            if (parentId != 0)
+            {
+                var parentNode = _NodeData.GetById(parentId);
+            }
+
+            if (ModelState.IsValid)
+            {
+                //Меняем родителя у элемента
+                if (parentId == 0)
+                {
+                    node!.ParentId = null;
+                    node.Parent = null;
+                    node.Depth = 1;
+                }
+                else
+                    node!.ParentId = parentId;
+
+
+                _NodeData.Move(node);
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(node);
+        }
+
+
 
 
 

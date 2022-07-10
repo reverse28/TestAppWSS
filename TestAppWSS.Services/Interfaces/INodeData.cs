@@ -4,17 +4,23 @@ namespace TestAppWSS.Services.Interfaces
 {
     public interface INodeData
     {
-        public List<Node> GetNodesList();
+        public IEnumerable<Node> GetNodesList();
 
-        public Node? AddNode(string name, int? pid);
+        public Node? GetById(int? id);
+
+        public Node? AddNode(Node node);
 
         public bool Delete(int id);
 
-        public Node? Edit(int id, string name);
+        public Node? Edit(Node node);
 
-        public Node? Move(int id, int parentId);
+        public Node? Move(Node node);
 
         public string GeneratePath(Node node);
+
+        public List<Node> RemoveChildrenFromList(List<Node> children, Node node);
+
+        public List<int> GetChildrenIds(int id, List<int> childrenIds);
 
     }
 }

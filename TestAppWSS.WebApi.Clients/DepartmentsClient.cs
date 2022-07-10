@@ -12,13 +12,9 @@ namespace TestAppWSS.WebApi.Clients
         }
 
 
-        public Node AddNode(string name, int? pid)
+        public Node AddNode(Node node)
         {
-            var response = Post($"{Adress}/add", new Node
-            {
-                Name = name,
-                ParentId = pid,
-            });
+            var response = Post($"{Adress}/add",  node);
 
             var department = response?.Content.ReadFromJsonAsync<Node>().Result;
 
@@ -34,12 +30,9 @@ namespace TestAppWSS.WebApi.Clients
         }
 
 
-        public Node Edit(int id, string name)
+        public Node Edit(Node node)
         {
-            var response = Post($"{Adress}/edit", new Node
-            {
-                Name = name,
-            });
+            var response = Post($"{Adress}/edit", node);
 
             var department = response?.Content.ReadFromJsonAsync<Node>().Result;
 
@@ -50,30 +43,45 @@ namespace TestAppWSS.WebApi.Clients
         {
             var response = Post($"{Adress}/path", node);
 
-            var department = response?.Content.ReadFromJsonAsync<string>().Result;
+            var department = response?.Content.ReadAsStringAsync().Result;
 
             return department!;
         }
 
-        public List<Node> GetNodesList()
+        public IEnumerable<Node> GetNodesList()
         {
             var departments = Get<List<Node>>($"{Adress}/departments");
             return departments!;
         }
 
-
-        public Node? Move(int nodeId, int newParentId)
+        public Node? GetById(int? id)
         {
-            var response = Post($"{Adress}/move", new Node
-            {
-                Id = nodeId,
-                ParentId = newParentId
-            });
+            var response = Get<Node>($"{Adress}/getbyid/{id}");
+            return response!;
+        }
+
+    public Node? Move(Node node)
+        {
+            var response = Post($"{Adress}/move", node);
 
             var department = response?.Content.ReadFromJsonAsync<Node>().Result;
 
             return department!;
         }
 
+        public List<Node> RemoveChildrenFromList(List<Node> children, Node node)
+        {
+
+            var response = Post($"{Adress}/removechildren", children, node);
+
+            var department = response?.Content.ReadFromJsonAsync<Node>().Result;
+
+            return department!;
+        }
+
+        public List<int> GetChildrenIds(int id, List<int> childrenIds)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

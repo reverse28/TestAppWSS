@@ -25,11 +25,20 @@ namespace TestAppWSS.WebApi.Controllers
             }
 
 
-            [HttpPost]
-            [Route("add/{pid?}")]
-            public IActionResult Add(string name, int Id)
+        [HttpGet("getbyid/{id?}")]
+        public IActionResult GetById(int Id)
+        {
+            var departments = _NodeData.GetById(Id);
+
+            return Ok(departments);
+        }
+    
+
+        [HttpPost]
+            [Route("add")]
+            public IActionResult Add(Node node)
             {
-                var department = _NodeData.AddNode(name, Id);
+                var department = _NodeData.AddNode(node);
 
                 return CreatedAtAction(nameof(Add), new { department!.Id }, department);
             }
@@ -45,19 +54,19 @@ namespace TestAppWSS.WebApi.Controllers
 
 
             [HttpPost]
-            [Route("edit/{id?}")]
-            public IActionResult Edit(int id, string name)
+            [Route("edit")]
+            public IActionResult Edit(Node node)
             {
-                var result = _NodeData.Edit(id, name);
+                var result = _NodeData.Edit(node);
 
                 return Ok(result);
             }
 
             [HttpPost]
             [Route("move/{id?}")]
-            public IActionResult Move(int id, int parentId)
+            public IActionResult Move(Node node)
             {
-                var result = _NodeData.Move(id, parentId);
+                var result = _NodeData.Move(node);
 
                 return Ok(result);
             }

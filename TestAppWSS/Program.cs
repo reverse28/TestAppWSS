@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using TestAppWSS.DAL;
 using TestAppWSS.Services;
 using TestAppWSS.Services.Interfaces;
+using TestAppWSS.WebApi.Clients;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +23,11 @@ switch (database_type)
 
 builder.Services.AddTransient<IDbInitializer, DbInitializer>();
 
-builder.Services.AddScoped<INodeData, NodeData>();
+
+//–аботаем через клиента, который шлет запросы на web-api
+builder.Services.AddHttpClient("WebApi", client => client.BaseAddress = new(builder.Configuration["WebApi"]))
+    .AddTypedClient<INodeData, DepartmentsClient>();
+
 
 var app = builder.Build();
 

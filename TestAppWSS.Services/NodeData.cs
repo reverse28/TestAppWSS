@@ -13,14 +13,8 @@ namespace TestAppWSS.Services
             _dbContext = dbContext;
         }
 
-        public Node? AddNode(string name, int? pid)
+        public Node? AddNode(Node node)
         {
-            var node = new Node()
-            {
-                Name = name,
-                ParentId = pid
-            };
-
             // Устанавливаем глубину для узла
             if (node.ParentId == null)
                 node.Depth = 1;
@@ -42,6 +36,7 @@ namespace TestAppWSS.Services
         {
             if (_dbContext.Departments.Find(id) is not null)
             {
+                _dbContext.Departments.Load();
                 var node = _dbContext.Departments.Find(id);
                 // Удаляем узел вместе с детишками
                 RemoveChildren(node!);
@@ -52,55 +47,33 @@ namespace TestAppWSS.Services
         }
 
 
-        public Node? Edit(int id, string name)
+        public Node? Edit(Node node)
         {
-            if (_dbContext.Departments.Find(id) is not null)
-            {
-                var node = _dbContext.Departments.Find(id);
-
-                node!.Name = name;
                 _dbContext.Update(node);
                 _dbContext.SaveChanges();
                 return node;
-            }
-            return null;
         }
 
-        public Node? Move(int id, int parentId)
+        public Node? Move(Node node)
         {
-            if (_dbContext.Departments.Find(parentId) is null || _dbContext.Departments.Find(id) is null)
+            if (_dbContext.Departments.Find(node.ParentId) is null || _dbContext.Departments.Find(node.Id) is null)
                 return null;
 
-            // Проверяем, не совпадает ли родительский идентификатор или один из дочерних элементов текущего узла
-            var childrenIds = GetChildrenIds(id, new List<int>());
+            // Проверяем, не совпадает ли родительский идентификатор и один из дочерних элементов текущего узла
+            var childrenIds = GetChildrenIds(node.Id, new List<int>());
 
             foreach (int childId in childrenIds)
             {
-                if (parentId == childId)
+                if (node.ParentId == childId)
                     return null;
             }
-
-            var node = _dbContext.Departments.Find(id);
-
-            var parentNode = _dbContext.Departments.Find(parentId);
-
-
-            // Перемещаем узел
-            if (parentId == 0)
-            {
-                node!.ParentId = null;
-                node.Parent = null;
-                node.Depth = 1;
-            }
-            else
-                node!.ParentId = parentId;
 
             _dbContext.Update(node);
             _dbContext.SaveChanges();
 
             _dbContext.Departments.Load();
 
-            // Обновление себя и детей
+            // Обновление себя и детишек
             UpdateChildrenDepth(node);
 
             _dbContext.SaveChanges();
@@ -147,7 +120,7 @@ namespace TestAppWSS.Services
         }
 
         // Удаление дочерних элементов из списка
-        private List<Node> RemoveChildrenFromList(List<Node> children, Node node)
+        public List<Node> RemoveChildrenFromList(List<Node> children, Node node)
         {
             if (node.Children != null)
             {
@@ -164,13 +137,13 @@ namespace TestAppWSS.Services
         }
 
         // Получить весь список
-        public List<Node> GetNodesList()
+        public IEnumerable<Node> GetNodesList()
         {
             List<Node> nodesList = new List<Node>();
             _dbContext.Departments.Load();
             var rootNodes = _dbContext.Departments.Where(n => n.Depth == 1).ToList();
 
-            rootNodes = rootNodes.OrderByDescending(n => n.Name).ToList();
+            rootNodes = rootNodes.OrderBy(n => n.Name).ToList();
             foreach (var node in rootNodes)
             {
                 // Add all roots with children
@@ -181,8 +154,19 @@ namespace TestAppWSS.Services
             return nodesList;
         }
 
+        // Получить весь список
+        public Node? GetById(int? id)
+        {
+            _dbContext.Departments.Load();
+            var node = _dbContext.Departments.FirstOrDefault(n => n.Id == id);
+
+            return node;
+        }
+
+
+
         // Получить идентификатор родителя и ребенка
-        private List<int> GetChildrenIds(int id, List<int> childrenIds)
+        public List<int> GetChildrenIds(int id, List<int> childrenIds)
         {
             var node = _dbContext.Departments.AsNoTracking().Where(n => n.Id == id).Include(n => n.Children).FirstOrDefault();
             if (node?.Children?.Count != 0)
@@ -220,7 +204,6 @@ namespace TestAppWSS.Services
                     return nodeList;
                 }
             
-            return null!;
         }
 
 
