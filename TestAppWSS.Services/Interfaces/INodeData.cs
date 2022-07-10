@@ -8,7 +8,7 @@ namespace TestAppWSS.Services.Interfaces
 
         public Node? AddNode(string name, int? pid);
 
-        public bool Delete(int? id);
+        public bool Delete(int id);
 
         public Node? Edit(int id, string name);
 

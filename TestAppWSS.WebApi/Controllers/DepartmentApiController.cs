@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TestAppWSS.Domain.Entities;
 using TestAppWSS.Services.Interfaces;
 
 namespace TestAppWSS.WebApi.Controllers
@@ -37,15 +38,15 @@ namespace TestAppWSS.WebApi.Controllers
 
 
             [Route("delete/{id?}")]
-            public IActionResult DeleteDepartment(int Id)
+            public bool DeleteDepartment(int Id)
             {
                 var result = _NodeData.Delete(Id);
 
-                return Ok(result);
+                return result;
             }
 
 
-
+            [HttpPost]
             [Route("edit/{id?}")]
             public IActionResult Edit(int id, string name)
             {
@@ -54,7 +55,7 @@ namespace TestAppWSS.WebApi.Controllers
                 return Ok(result);
             }
 
-
+            [HttpPost]
             [Route("move/{id?}")]
             public IActionResult Move(int id, int parentId)
             {
@@ -63,6 +64,16 @@ namespace TestAppWSS.WebApi.Controllers
                 return Ok(result);
             }
 
+
+
+            [HttpPost]
+            [Route("path/{id?}")]
+            public IActionResult GeneratePath(Node node)
+            {
+                var result = _NodeData.GeneratePath(node);
+
+                return Ok(result);
+            }
         }
     }
 }
