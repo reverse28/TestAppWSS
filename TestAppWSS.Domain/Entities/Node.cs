@@ -16,7 +16,11 @@ namespace TestAppWSS.Domain.Entities
         public int? ParentId { get; set; }
 
 
+        [System.Text.Json.Serialization.JsonIgnore]
         public virtual Node? Parent { get; set; }
+
+
+        [System.Text.Json.Serialization.JsonIgnore]
         public virtual ICollection<Node>? Children { get; set; }
     }
 }

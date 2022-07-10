@@ -38,7 +38,7 @@ namespace TestAppWSS.Services
         }
 
 
-        public bool Delete(int? id)
+        public bool Delete(int id)
         {
             if (_dbContext.Departments.Find(id) is not null)
             {
@@ -175,7 +175,7 @@ namespace TestAppWSS.Services
             {
                 // Add all roots with children
                 nodesList.Add(node);
-                nodesList=ToNodesList(nodesList);
+                nodesList=ToNodesList(node, nodesList);
             }
 
             return nodesList;
@@ -203,17 +203,15 @@ namespace TestAppWSS.Services
 
 
         // Рекурсивно получаем всех детей для списка узлов
-        private List<Node> ToNodesList(List<Node> nodeList)
+        private List<Node> ToNodesList(Node node, List<Node> nodeList)
         {
-            foreach (var node in nodeList)
-            {
                 if (node.Children != null)
                 {
                     node.Children = node.Children.OrderBy(n => n.Name).ToList();
                     foreach (var child in node.Children)
                     {
                         nodeList.Add(child);
-                        nodeList = ToNodesList(nodeList);
+                        nodeList = ToNodesList(child, nodeList);
                     }
                     return nodeList;
                 }
@@ -221,8 +219,7 @@ namespace TestAppWSS.Services
                 {
                     return nodeList;
                 }
-            }
-
+            
             return null!;
         }
 

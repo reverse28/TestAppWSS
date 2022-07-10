@@ -1,27 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using TestAppWSS.Models;
+using TestAppWSS.Services.Interfaces;
 
 namespace TestAppWSS.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public IActionResult Index([FromServices] INodeData NodeData)
         {
-            _logger = logger;
+            var deprtments = NodeData.GetNodesList();
+
+            return View(deprtments);
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

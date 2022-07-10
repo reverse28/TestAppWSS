@@ -4,15 +4,13 @@ using TestAppWSS.Services.Interfaces;
 
 namespace TestAppWSS.WebApi.Controllers
 {
-    public class DepartmentApiController
-    {
         [Route("api")]
         [ApiController]
-        public class DepartmentsApiController : ControllerBase
+        public class DepartmentApiController : ControllerBase
         {
             private readonly INodeData _NodeData;
 
-            public DepartmentsApiController(INodeData NodeData)
+            public DepartmentApiController(INodeData NodeData)
             {
                 _NodeData = NodeData;
             }
@@ -37,7 +35,7 @@ namespace TestAppWSS.WebApi.Controllers
             }
 
 
-            [Route("delete/{id?}")]
+            [HttpGet("delete/{id?}")]
             public bool DeleteDepartment(int Id)
             {
                 var result = _NodeData.Delete(Id);
@@ -76,4 +74,4 @@ namespace TestAppWSS.WebApi.Controllers
             }
         }
     }
-}
+

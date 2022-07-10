@@ -6,4 +6,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TestAppWSS.DAL\TestAppWSS.DAL.csproj" />
+    <ProjectReference Include="..\TestAppWSS.Domain\TestAppWSS.Domain.csproj" />
+    <ProjectReference Include="..\TestAppWSS.Services\TestAppWSS.Services.csproj" />
+    <ProjectReference Include="..\TestAppWSS.WebApi.Clients\TestAppWSS.WebApi.Clients.csproj" />
+    <ProjectReference Include="..\TestAppWSS.WebApi\TestAppWSS.WebApi.csproj" />
+  </ItemGroup>
+
 </Project>

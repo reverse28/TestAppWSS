@@ -1,8 +1,36 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model ICollection<Node>
+@{
+    ViewData["Title"] = "Стартовая";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div id="tree">
+    <select id="tree_select" class="form-select w-100" size="16" v-model="selected">
+        <option value="0" selected>/.</option>
+        @foreach (var item in Model)
+        {
+            <option value="@item.Id">
+                @Html.Raw(String.Concat(Enumerable.Repeat("&emsp;", item.Depth)))
+                @Html.DisplayFor(modelItem => item.Name)
+            </option>
+        }
+    </select>
+
+
+    <div class="row mt-2">
+        <div class="col-9">
+            <button type="button" class="btn btn-primary" onclick="location.href='@Url.Action("Add", "Home")/' + encodeURIComponent(document.getElementById('tree_select').value);">Add</button>
+            <button :disabled="selected == '0'" type="button" class="btn btn-primary" onclick="location.href='@Url.Action("Edit", "Home")/' + encodeURIComponent(document.getElementById('tree_select').value);">Edit</button>
+            <button :disabled="selected == '0'" type="button" class="btn btn-primary" onclick="location.href='@Url.Action("Delete", "Home")/' + encodeURIComponent(document.getElementById('tree_select').value);">Delete</button>
+            <button :disabled="selected == '0'" type="button" class="btn btn-primary" onclick="location.href='@Url.Action("Move", "Home")/' + encodeURIComponent(document.getElementById('tree_select').value);">Move</button>
+        </div>
+    </div>
 </div>
+
+<script>
+    var tree = new Vue({
+        el: '#tree',
+        data: {
+            selected: '0'
+        }
+    })
+</script>
