@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TestAppWSS.DAL\TestAppWSS.DAL.csproj" />
+    <ProjectReference Include="..\TestAppWSS.Domain\TestAppWSS.Domain.csproj" />
+    <ProjectReference Include="..\TestAppWSS.Services\TestAppWSS.Services.csproj" />
+    <ProjectReference Include="..\TestAppWSS.WebApi.Clients\TestAppWSS.WebApi.Clients.csproj" />
+    <ProjectReference Include="..\TestAppWSS.WebApi\TestAppWSS.WebApi.csproj" />
+  </ItemGroup>
+
+</Project>

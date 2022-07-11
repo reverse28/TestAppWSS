@@ -1,0 +1,30 @@
+﻿@model Node
+
+@{
+    ViewData["Title"] = "Добавление";
+}
+
+<h1>Добавить</h1>
+<hr />
+
+<form asp-action="Add">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="ParentId" value="@ViewData["Pid"]" />
+    <label asp-for="Name" class="control-label"></label>
+    <div class="input-group">
+        <div class="input-group-prepend">
+            <div class="input-group-text">@ViewData["Path"]</div>
+        </div>
+        <input asp-for="Name" class="form-control" />
+    </div>
+    <span asp-validation-for="Name" class="text-danger"></span>
+    <div class="form-group mt-3">
+        <input type="submit" value="Добавить" class="btn btn-primary" /> |
+        <a asp-action="Index">Назад к списку</a>
+    </div>
+</form>
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
