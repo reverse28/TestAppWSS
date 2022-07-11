@@ -30,7 +30,16 @@ namespace TestAppWSS.Services
             //Устанавливаем ID на текущей глубине
             node.DepthId = _dbContext.Departments.Where(n => n.ParentId == node.ParentId).Count() + 1;
 
-            node.Name = $"{node.Name} {node.DepthId}";
+            //Автоматическая нумерация
+            var new_name= $"{node.Name} {node.DepthId}";
+
+            //Если вдруг совпали имена, увеличиваем индекс
+            while (_dbContext.Departments.Any(n => n.Name == new_name))
+            {
+                new_name= $"{node.Name} {node.DepthId+1}";
+            }
+
+            node.Name = new_name;
 
             _dbContext.Add(new Node()
             {
@@ -90,7 +99,6 @@ namespace TestAppWSS.Services
 
             return node;
         }
-
 
 
 
@@ -236,39 +244,42 @@ namespace TestAppWSS.Services
         //Импорт файла
         public bool ImportXml(byte[] fileData)
         {
-            XmlSerializer xmlFormat = new XmlSerializer(typeof(List<Node>));
-
-            List<Node>? nodes = xmlFormat.Deserialize(new MemoryStream(fileData)) as List<Node>;
-
-            if (nodes is null)
-                return false;
-
-            _dbContext.Departments.Load();
-            foreach (var node in _dbContext.Departments)
+            try
             {
-                RemoveChildren(node!);
-            }
-            _dbContext.SaveChanges();
+                XmlSerializer xmlFormat = new XmlSerializer(typeof(List<Node>));
 
-            //обнуляем значение автоинкремента ID
-            _dbContext.Database.ExecuteSqlRaw("DBCC CHECKIDENT('Departments', RESEED, 0);", "").ToString();
+                List<Node>? nodes = xmlFormat.Deserialize(new MemoryStream(fileData)) as List<Node>;
 
-            foreach (var node in nodes.OrderBy(n => n.Id))
-            {
-                _dbContext.Add(new Node()
+                if (nodes is null)
+                    return false;
+
+                //Удаляем старые данные
+                _dbContext.Database.ExecuteSqlRaw("TRUNCATE TABLE [Departments]", "").ToString();
+
+                //обнуляем значение автоинкремента ID
+                _dbContext.Database.ExecuteSqlRaw("DBCC CHECKIDENT('Departments', RESEED, 1);", "").ToString();
+
+
+                _dbContext.Departments.AddRange(nodes.OrderBy(n => n.Id).Select(d => new Node()
                 {
-                    Name = node.Name,
-                    ParentId = node.ParentId,
-                    Depth = node.Depth,
-                    DepthId = node.DepthId
-                });
+                    Name = d.Name,
+                    Depth = d.Depth,
+                    DepthId = d.DepthId,
+                    ParentId = d.ParentId,
+                }));
 
+                _dbContext.SaveChanges();
+
+                return true;
 
             }
-            _dbContext.SaveChanges();
+            catch
+            {
+                _dbContext.Database.ExecuteSqlRaw("TRUNCATE TABLE [Departments]", "").ToString();
 
-            return true;
-
+                return false;
+            }
         }
+
     }
 }

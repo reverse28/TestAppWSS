@@ -16,27 +16,21 @@ namespace TestAppWSS.Controllers
             _NodeData = NodeData;
         }
 
+
         public IActionResult Index()
         {
             var deprtments = _NodeData.GetNodesList();
-
             return View(deprtments);
         }
-
 
 
         [HttpGet("Home/Add/{pid?}")]
         public IActionResult Add(int? pid)
         {
-            if (pid == null)
-                return NotFound();
 
             if (pid != 0)
             {
                 var node = _NodeData.GetById(pid);
-
-                if (node == null)
-                    return NotFound();
 
                 ViewData["Pid"] = node.Id;
                 ViewData["Path"] = _NodeData.GeneratePath(node);
@@ -62,7 +56,10 @@ namespace TestAppWSS.Controllers
                 {
                     var parentDepth = _NodeData.GetById(node.ParentId);
                     if (parentDepth == null)
-                        return NotFound();
+                    {
+                        TempData["Error"] = "Не удалось найти указанного родителя";
+                        return RedirectToAction(nameof(Index));
+                    }
                     node.Depth = parentDepth.Depth + 1;
                 }
                 _NodeData.AddNode(node);
@@ -71,10 +68,13 @@ namespace TestAppWSS.Controllers
 
             if (node.ParentId != 0)
             {
-                node = _NodeData.GetById(node.ParentId);
+                node = _NodeData.GetById(node.ParentId)!;
 
                 if (node == null)
-                    return NotFound();
+                {
+                    TempData["Error"] = "Заданный узел отсутвует в списке";
+                    return RedirectToAction(nameof(Index));
+                }
 
                 ViewData["Pid"] = node.Id;
                 ViewData["Path"] = _NodeData.GeneratePath(node);
@@ -96,6 +96,7 @@ namespace TestAppWSS.Controllers
 
             if (id == null || id == 0)
             {
+                TempData["Error"] = "Корневой элемент нельзя удалить";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -108,9 +109,6 @@ namespace TestAppWSS.Controllers
         [Route("Home/Delete/{id?}")]
         public IActionResult DeleteConfirmed(int id)
         {
-            if (id == 0)
-                return NotFound();
-
             _NodeData.Delete(id);
 
             return RedirectToAction(nameof(Index));
@@ -122,6 +120,7 @@ namespace TestAppWSS.Controllers
         {
             if (id == null || id == 0)
             {
+                TempData["Error"] = "Корневой элемент нельзя редактировать";
                 return RedirectToAction(nameof(Index));
             }
             var node = _NodeData.GetById(id);
@@ -157,7 +156,10 @@ namespace TestAppWSS.Controllers
         public IActionResult Move(int? id)
         {
             if (id == null || id == 0)
-                return NotFound();
+            {
+                TempData["Error"] = "Корневой элемент нельзя перемещать";
+                return RedirectToAction(nameof(Index));
+            }
 
             var node = _NodeData.GetById(id);
 
@@ -194,13 +196,11 @@ namespace TestAppWSS.Controllers
 
             if (ModelState.IsValid)
             {
-                ViewData["Error"] = "";
                 var nodes = _NodeData.GetNodesList().Where(n => n.ParentId == parentId);
                 if (nodes.Any(n => n.Name == node!.Name))
                 {
-                    ViewData["Error"] = "Компонент с таким именем уже существует в списке, выберите другой путь или измените имя";
-                    Move(parentId);
-                    return View(node);
+                    TempData["Error"]  = "Компонент с таким именем уже существует в списке, выберите другой путь или измените имя";
+                    return RedirectToAction(nameof(Index));
                 }
 
                 //Меняем родителя у элемента
@@ -238,7 +238,6 @@ namespace TestAppWSS.Controllers
         [HttpPost]
         public IActionResult ImportXml(IFormFile uploadedFile)
         {
-            ViewData["Error"] = "";
             if (uploadedFile != null)
             {
                 var fileStream = new MemoryStream();
@@ -247,11 +246,10 @@ namespace TestAppWSS.Controllers
                 var result = _NodeData.ImportXml(fileStream.ToArray());
 
                 if (!result)
-                    ViewData["Error"] = "Во время загрузки произошла ошибка";
+                    TempData["Error"] = "Во время загрузки произошла ошибка, проверьте корректность загружаемого файла";
             }
             return RedirectToAction("Index");
         }
-
 
 
 
