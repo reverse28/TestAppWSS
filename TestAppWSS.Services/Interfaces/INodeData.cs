@@ -18,9 +18,5 @@ namespace TestAppWSS.Services.Interfaces
 
         public string GeneratePath(Node node);
 
-        public List<Node> RemoveChildrenFromList(List<Node> children, Node node);
-
-        public List<int> GetChildrenIds(int id, List<int> childrenIds);
-
     }
 }

@@ -32,7 +32,6 @@ namespace TestAppWSS.Controllers
             if (pid == null)
                 return NotFound();
 
-            // When not adding new root
             if (pid != 0)
             {
                 var node = _NodeData.GetById(pid);
@@ -43,7 +42,6 @@ namespace TestAppWSS.Controllers
                 ViewData["Pid"] = node.Id;
                 ViewData["Path"] = _NodeData.GeneratePath(node);
             }
-            // When adding new root
             else
             {
                 ViewData["Pid"] = null;
@@ -58,7 +56,7 @@ namespace TestAppWSS.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Set new "Depth" for node
+                // Установить глубину для элемента
                 if (node.ParentId == null)
                     node.Depth = 1;
                 else
@@ -72,7 +70,6 @@ namespace TestAppWSS.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Get new ViewData if modelState is not valid
             if (node.ParentId != 0)
             {
                 node = _NodeData.GetById(node.ParentId);
@@ -83,7 +80,6 @@ namespace TestAppWSS.Controllers
                 ViewData["Pid"] = node.Id;
                 ViewData["Path"] = _NodeData.GeneratePath(node);
             }
-            // When adding new root
             else
             {
                 ViewData["Pid"] = null;
@@ -98,7 +94,6 @@ namespace TestAppWSS.Controllers
         [Route("Home/Delete/{id?}")]
         public IActionResult Delete(int? id)
         {
-            // Don't allow to remove root
             if (id == null || id == 0)
                 return NotFound();
 
@@ -156,9 +151,13 @@ namespace TestAppWSS.Controllers
 
             var node = _NodeData.GetById(id);
 
-             // Создаем список для выбора новго родителя, в списке отсутвуют дочерние элементы узла
-            var selectList = _NodeData.GetNodesList().Where(n => n.Id != id).ToList();
-            selectList = _NodeData.RemoveChildrenFromList(selectList, node!);
+            // Создаем список для выбора новго родителя, так как в категориях могут быть одинаковые имена, показываем полный путь
+            var selectList = _NodeData.GetNodesList().Where(n => n.Id != id).Select(s =>new Node() { 
+                Name = _NodeData.GeneratePath(s),
+                Id=s.Id,
+                ParentId=s.ParentId,
+            }).ToList();
+
             selectList.Insert(0, new Node
             {
                 Id = 0,
@@ -201,8 +200,6 @@ namespace TestAppWSS.Controllers
 
             return View(node);
         }
-
-
 
 
 

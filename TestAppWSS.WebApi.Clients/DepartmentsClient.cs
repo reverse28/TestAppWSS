@@ -69,15 +69,6 @@ namespace TestAppWSS.WebApi.Clients
             return department!;
         }
 
-        public List<Node> RemoveChildrenFromList(List<Node> children, Node node)
-        {
-
-            var response = Post($"{Adress}/removechildren", children, node);
-
-            var department = response?.Content.ReadFromJsonAsync<Node>().Result;
-
-            return department!;
-        }
 
         public List<int> GetChildrenIds(int id, List<int> childrenIds)
         {

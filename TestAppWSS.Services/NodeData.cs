@@ -49,16 +49,13 @@ namespace TestAppWSS.Services
 
         public Node? Edit(Node node)
         {
-                _dbContext.Update(node);
-                _dbContext.SaveChanges();
-                return node;
+            _dbContext.Update(node);
+            _dbContext.SaveChanges();
+            return node;
         }
 
         public Node? Move(Node node)
         {
-            if (_dbContext.Departments.Find(node.ParentId) is null || _dbContext.Departments.Find(node.Id) is null)
-                return null;
-
             // Проверяем, не совпадает ли родительский идентификатор и один из дочерних элементов текущего узла
             var childrenIds = GetChildrenIds(node.Id, new List<int>());
 
@@ -119,22 +116,6 @@ namespace TestAppWSS.Services
             _dbContext.Remove(node);
         }
 
-        // Удаление дочерних элементов из списка
-        public List<Node> RemoveChildrenFromList(List<Node> children, Node node)
-        {
-            if (node.Children != null)
-            {
-                foreach (var child in node.Children)
-                {
-                    children = RemoveChildrenFromList(children, child);
-                    children.Remove(child);
-                }
-            }
-            else
-                children.Remove(node);
-
-            return children;
-        }
 
         // Получить весь список
         public IEnumerable<Node> GetNodesList()
@@ -146,9 +127,9 @@ namespace TestAppWSS.Services
             rootNodes = rootNodes.OrderBy(n => n.Name).ToList();
             foreach (var node in rootNodes)
             {
-                // Add all roots with children
+                // Добавляем узлы с дочерними элементами
                 nodesList.Add(node);
-                nodesList=ToNodesList(node, nodesList);
+                nodesList = ToNodesList(node, nodesList);
             }
 
             return nodesList;
@@ -165,7 +146,7 @@ namespace TestAppWSS.Services
 
 
 
-        // Получить идентификатор родителя и ребенка
+        // Получаем идентификаторы дочерних элементов
         public List<int> GetChildrenIds(int id, List<int> childrenIds)
         {
             var node = _dbContext.Departments.AsNoTracking().Where(n => n.Id == id).Include(n => n.Children).FirstOrDefault();
@@ -189,21 +170,21 @@ namespace TestAppWSS.Services
         // Рекурсивно получаем всех детей для списка узлов
         private List<Node> ToNodesList(Node node, List<Node> nodeList)
         {
-                if (node.Children != null)
+            if (node.Children != null)
+            {
+                node.Children = node.Children.OrderBy(n => n.Name).ToList();
+                foreach (var child in node.Children)
                 {
-                    node.Children = node.Children.OrderBy(n => n.Name).ToList();
-                    foreach (var child in node.Children)
-                    {
-                        nodeList.Add(child);
-                        nodeList = ToNodesList(child, nodeList);
-                    }
-                    return nodeList;
+                    nodeList.Add(child);
+                    nodeList = ToNodesList(child, nodeList);
                 }
-                else
-                {
-                    return nodeList;
-                }
-            
+                return nodeList;
+            }
+            else
+            {
+                return nodeList;
+            }
+
         }
 
 
@@ -211,10 +192,12 @@ namespace TestAppWSS.Services
         public string GeneratePath(Node node)
         {
             string path = node.Name + "/";
-            while (node.Parent != null)
+            var parent = GetById(node.ParentId);
+
+            while (parent != null)
             {
-                path = node.Parent.Name + "/" + path;
-                node.Parent = node.Parent.Parent;
+                path = parent.Name + "/" + path;
+                parent = parent.Parent;
             }
             return "/" + path;
         }
