@@ -67,7 +67,16 @@ namespace TestAppWSS.Services
 
             await using (await _db.Database.BeginTransactionAsync(Cancel))
             {
-                await _db.Departments.AddRangeAsync(TestData.Departments, Cancel);
+                await _db.Departments.AddRangeAsync(TestData.Departments.Select(d=>new Domain.Entities.Node()
+                {
+                    Name = $"{d.Name} {d.DepthId}",
+                    Id=d.Id,
+                    Parent=d.Parent,
+                    Depth=d.Depth,
+                    Children=d.Children,
+                    DepthId=d.DepthId,
+                    ParentId=d.ParentId
+                }), Cancel);
 
                 await _db.SaveChangesAsync(Cancel);
 

@@ -25,6 +25,12 @@ namespace TestAppWSS.Services
                     return null;
                 node.Depth = parentDepth.Depth + 1;
             }
+
+            //Устанавливаем ID на текущей глубине
+            node.DepthId = _dbContext.Departments.Where(n => n.ParentId == node.ParentId).Count()+1;
+
+            node.Name = $"{node.Name} {node.DepthId}";
+
             _dbContext.Add(node);
             _dbContext.SaveChanges();
 
@@ -163,7 +169,6 @@ namespace TestAppWSS.Services
 
             return childrenIds;
         }
-
 
 
 

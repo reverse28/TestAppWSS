@@ -134,6 +134,14 @@ namespace TestAppWSS.Controllers
 
             if (ModelState.IsValid)
             {
+                ViewData["Error"] = "";
+                var nodes = _NodeData.GetNodesList();
+                if (nodes.Any(n => n.Name == name))
+                {
+                    ViewData["Error"] = "Компонент с таким именем уже существует в списке";
+                    return View(node); 
+                }
+
                 node!.Name = name;
                 _NodeData.Edit(node);
                 return RedirectToAction(nameof(Index));
@@ -183,6 +191,14 @@ namespace TestAppWSS.Controllers
 
             if (ModelState.IsValid)
             {
+                ViewData["Error"] = "";
+                var nodes = _NodeData.GetNodesList();
+                if (nodes.Any(n => n.Name == node!.Name))
+                {
+                    ViewData["Error"] = "Компонент с таким именем уже существует в списке, выберите другой путь или измените имя";
+                    return View(node);
+                }
+
                 //Меняем родителя у элемента
                 if (parentId == 0)
                 {

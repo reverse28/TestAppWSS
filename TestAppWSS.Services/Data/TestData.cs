@@ -8,57 +8,89 @@ namespace TestAppWSS.Services.Data
      {
              new Node
                 {
-                    Name = "Компания 1",
+                    Name = $"Компания",
                     Depth = 1,
+                    DepthId=1,
                     ParentId = null
                 },
                new Node
                 {
-                    Name = "Компания 2",
+                    Name = "Компания",
                     Depth = 1,
+                    DepthId=2,
                     ParentId = null
                 },
 
                  new Node
                 {
-                    Name = "Департамент 1",
+                    Name = "Департамент",
                     Depth = 2,
+                    DepthId=1,
                     ParentId = 1
                 },
 
                  new Node
                 {
-                    Name = "Департамент 2",
+                    Name = "Департамент",
                     Depth = 2,
+                    DepthId=2,
+                    ParentId = 1
+                },
+
+                   new Node
+                {
+                    Name = "Департамент",
+                    Depth = 2,
+                    DepthId=3,
                     ParentId = 1
                 },
 
                 new Node
                 {
-                    Name = "Департамент 1",
+                    Name = "Департамент",
                     Depth = 2,
+                    DepthId=1,
                     ParentId = 2
                 },
 
                 new Node
                 {
-                    Name = "Отдел 1",
+                    Name = "Отдел",
                     Depth = 3,
+                    DepthId=1,
                     ParentId = 4
                 },
 
                 new Node
                 {
-                    Name = "Отдел 2",
+                    Name = "Отдел",
                     Depth = 3,
+                    DepthId=2,
                     ParentId = 4
                 },
 
                new Node
                 {
-                    Name = "Отдел 3",
+                    Name = "Отдел",
                     Depth = 3,
+                    DepthId=3,
                     ParentId = 4
+                },
+
+                  new Node
+                {
+                    Name = "Отдел",
+                    Depth = 3,
+                    DepthId=1,
+                    ParentId = 5
+                },
+
+                new Node
+                {
+                    Name = "Отдел",
+                    Depth = 3,
+                    DepthId=2,
+                    ParentId = 5
                 },
         };
     }

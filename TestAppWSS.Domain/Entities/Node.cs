@@ -12,6 +12,9 @@ namespace TestAppWSS.Domain.Entities
         [Required]
         public int Depth { get; set; } //глубина нахождения
 
+        [Required]
+        public int DepthId { get; set; } //Id на текущей глубине 
+
         [Display(Name = "Parent")]
         public int? ParentId { get; set; }
 
