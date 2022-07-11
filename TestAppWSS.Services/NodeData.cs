@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Xml.Serialization;
 using TestAppWSS.DAL;
 using TestAppWSS.Domain.Entities;
 using TestAppWSS.Services.Interfaces;
@@ -27,11 +28,17 @@ namespace TestAppWSS.Services
             }
 
             //Устанавливаем ID на текущей глубине
-            node.DepthId = _dbContext.Departments.Where(n => n.ParentId == node.ParentId).Count()+1;
+            node.DepthId = _dbContext.Departments.Where(n => n.ParentId == node.ParentId).Count() + 1;
 
             node.Name = $"{node.Name} {node.DepthId}";
 
-            _dbContext.Add(node);
+            _dbContext.Add(new Node()
+            {
+                Name = node.Name,
+                ParentId = node.ParentId,
+                Depth = node.Depth,
+                DepthId = node.DepthId
+            });
             _dbContext.SaveChanges();
 
             return node;
@@ -205,6 +212,63 @@ namespace TestAppWSS.Services
                 parent = parent.Parent;
             }
             return "/" + path;
+        }
+
+
+        //Экспорт файла
+        public byte[] ExportXml()
+        {
+            MemoryStream outputMemStream = new MemoryStream();
+
+            var list = GetNodesList();
+
+            XmlSerializer xmlFormat = new XmlSerializer(typeof(List<Node>));
+
+            xmlFormat.Serialize(outputMemStream, list);
+
+            outputMemStream.Position = 0;
+
+            return outputMemStream.ToArray();
+
+        }
+
+
+        //Импорт файла
+        public bool ImportXml(byte[] fileData)
+        {
+            XmlSerializer xmlFormat = new XmlSerializer(typeof(List<Node>));
+
+            List<Node>? nodes = xmlFormat.Deserialize(new MemoryStream(fileData)) as List<Node>;
+
+            if (nodes is null)
+                return false;
+
+            _dbContext.Departments.Load();
+            foreach (var node in _dbContext.Departments)
+            {
+                RemoveChildren(node!);
+            }
+            _dbContext.SaveChanges();
+
+            //обнуляем значение автоинкремента ID
+            _dbContext.Database.ExecuteSqlRaw("DBCC CHECKIDENT('Departments', RESEED, 0);", "").ToString();
+
+            foreach (var node in nodes.OrderBy(n => n.Id))
+            {
+                _dbContext.Add(new Node()
+                {
+                    Name = node.Name,
+                    ParentId = node.ParentId,
+                    Depth = node.Depth,
+                    DepthId = node.DepthId
+                });
+
+
+            }
+            _dbContext.SaveChanges();
+
+            return true;
+
         }
     }
 }

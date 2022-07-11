@@ -11,7 +11,6 @@ namespace TestAppWSS.Controllers
     {
         INodeData _NodeData;
 
-
         public HomeController([FromServices] INodeData NodeData)
         {
             _NodeData = NodeData;
@@ -27,7 +26,7 @@ namespace TestAppWSS.Controllers
 
 
         [HttpGet("Home/Add/{pid?}")]
-        public  IActionResult Add(int? pid)
+        public IActionResult Add(int? pid)
         {
             if (pid == null)
                 return NotFound();
@@ -61,7 +60,7 @@ namespace TestAppWSS.Controllers
                     node.Depth = 1;
                 else
                 {
-                    var parentDepth =  _NodeData.GetById(node.ParentId);
+                    var parentDepth = _NodeData.GetById(node.ParentId);
                     if (parentDepth == null)
                         return NotFound();
                     node.Depth = parentDepth.Depth + 1;
@@ -94,8 +93,11 @@ namespace TestAppWSS.Controllers
         [Route("Home/Delete/{id?}")]
         public IActionResult Delete(int? id)
         {
+
             if (id == null || id == 0)
-                return NotFound();
+            {
+                return RedirectToAction(nameof(Index));
+            }
 
             var node = _NodeData.GetById(id);
 
@@ -120,7 +122,7 @@ namespace TestAppWSS.Controllers
         {
             if (id == null || id == 0)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Index));
             }
             var node = _NodeData.GetById(id);
             return View(node);
@@ -139,7 +141,7 @@ namespace TestAppWSS.Controllers
                 if (nodes.Any(n => n.Name == name))
                 {
                     ViewData["Error"] = "Компонент с таким именем уже существует в списке";
-                    return View(node); 
+                    return View(node);
                 }
 
                 node!.Name = name;
@@ -160,10 +162,11 @@ namespace TestAppWSS.Controllers
             var node = _NodeData.GetById(id);
 
             // Создаем список для выбора новго родителя, так как в категориях могут быть одинаковые имена, показываем полный путь
-            var selectList = _NodeData.GetNodesList().Where(n => n.Id != id).Select(s =>new Node() { 
+            var selectList = _NodeData.GetNodesList().Where(n => n.Id != id).Select(s => new Node()
+            {
                 Name = _NodeData.GeneratePath(s),
-                Id=s.Id,
-                ParentId=s.ParentId,
+                Id = s.Id,
+                ParentId = s.ParentId,
             }).ToList();
 
             selectList.Insert(0, new Node
@@ -183,7 +186,7 @@ namespace TestAppWSS.Controllers
         public IActionResult Move(int id, int parentId)
         {
             var node = _NodeData.GetById(id);
-          
+
             if (parentId != 0)
             {
                 var parentNode = _NodeData.GetById(parentId);
@@ -192,10 +195,11 @@ namespace TestAppWSS.Controllers
             if (ModelState.IsValid)
             {
                 ViewData["Error"] = "";
-                var nodes = _NodeData.GetNodesList();
+                var nodes = _NodeData.GetNodesList().Where(n => n.ParentId == parentId);
                 if (nodes.Any(n => n.Name == node!.Name))
                 {
                     ViewData["Error"] = "Компонент с таким именем уже существует в списке, выберите другой путь или измените имя";
+                    Move(parentId);
                     return View(node);
                 }
 
@@ -216,6 +220,38 @@ namespace TestAppWSS.Controllers
 
             return View(node);
         }
+
+
+
+        [HttpPost, ActionName("ExportXml")]
+        public IActionResult ExportXml()
+        {
+            var bytes = _NodeData.ExportXml();
+
+            string file_type = "application/xml";
+            string file_name = "nodes.xml";
+
+            return File(bytes, file_type, file_name);
+        }
+
+
+        [HttpPost]
+        public IActionResult ImportXml(IFormFile uploadedFile)
+        {
+            ViewData["Error"] = "";
+            if (uploadedFile != null)
+            {
+                var fileStream = new MemoryStream();
+                uploadedFile.CopyTo(fileStream);
+
+                var result = _NodeData.ImportXml(fileStream.ToArray());
+
+                if (!result)
+                    ViewData["Error"] = "Во время загрузки произошла ошибка";
+            }
+            return RedirectToAction("Index");
+        }
+
 
 
 

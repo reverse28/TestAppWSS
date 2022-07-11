@@ -17,6 +17,7 @@
 
 
     <div class="row mt-2">
+         <p class="text text-danger">@ViewData["Error"] </p>
         <div class="col-9">
             <button type="button" class="btn btn-primary" onclick="location.href='@Url.Action("Add", "Home")/' + encodeURIComponent(document.getElementById('tree_select').value);">Добавить</button>
             <button :disabled="selected == '0'" type="button" class="btn btn-primary" onclick="location.href='@Url.Action("Edit", "Home")/' + encodeURIComponent(document.getElementById('tree_select').value);">Изменить</button>
@@ -24,6 +25,28 @@
             <button :disabled="selected == '0'" type="button" class="btn btn-primary" onclick="location.href='@Url.Action("Move", "Home")/' + encodeURIComponent(document.getElementById('tree_select').value);">Переместить</button>
         </div>
     </div>
+
+   
+
+    <div class="row mt-2">
+        <div class="col-9">
+
+            <form asp-action="ExportXml">
+                <div class="form-group mt-3">
+                    <input type="submit" value="Экспорт в файл" class="btn btn-primary" /> 
+                </div>
+            </form>
+
+            <form method="post" enctype="multipart/form-data" asp-action="ImportXml">
+                <div class="form-group mt-3">
+                        <input type="file" name="uploadedFile" onchange="form.submit()" value="Импорт файла" class="btn-primary" />
+                    </div>
+            </form>
+
+        </div>
+    </div>
+
+
 </div>
 
 <script>

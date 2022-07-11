@@ -14,7 +14,7 @@ namespace TestAppWSS.WebApi.Clients
 
         public Node AddNode(Node node)
         {
-            var response = Post($"{Adress}/add",  node);
+            var response = Post($"{Adress}/add", node);
 
             var department = response?.Content.ReadFromJsonAsync<Node>().Result;
 
@@ -60,7 +60,7 @@ namespace TestAppWSS.WebApi.Clients
             return response!;
         }
 
-    public Node? Move(Node node)
+        public Node? Move(Node node)
         {
             var response = Post($"{Adress}/move", node);
 
@@ -70,9 +70,21 @@ namespace TestAppWSS.WebApi.Clients
         }
 
 
-        public List<int> GetChildrenIds(int id, List<int> childrenIds)
+        public byte[] ExportXml()
         {
-            throw new NotImplementedException();
+            var response = Get<byte[]>($"{Adress}/exportxml");
+
+            return response!;
         }
+
+        public bool ImportXml(byte[] arr)
+        {
+            var response = Post($"{Adress}/importxml", arr);
+
+            var result = response!.Content.ReadFromJsonAsync<bool>().Result;
+
+            return result;
+        }
+
     }
 }

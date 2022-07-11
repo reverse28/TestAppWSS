@@ -1,9 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using System.Xml.Serialization;
 using TestAppWSS.Domain.Entities.Base;
 
 namespace TestAppWSS.Domain.Entities
 {
-    public class Node: Entity
+    public class Node : Entity
     {
         [Required]
         [MaxLength(24)]
@@ -19,11 +22,11 @@ namespace TestAppWSS.Domain.Entities
         public int? ParentId { get; set; }
 
 
-        [System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore, XmlIgnoreAttribute, NotMapped]
         public virtual Node? Parent { get; set; }
 
 
-        [System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore, XmlIgnoreAttribute, NotMapped]
         public virtual ICollection<Node>? Children { get; set; }
     }
 }

@@ -82,6 +82,24 @@ namespace TestAppWSS.WebApi.Controllers
             return Ok(result);
         }
 
+
+        [HttpGet("exportxml")]
+        public IActionResult ExportXml()
+        {
+            var result = _NodeData.ExportXml();
+
+            return Ok(result);
+        }
+
+        [HttpPost]
+        [Route("importxml")]
+        public IActionResult importxml(byte[] data)
+        {
+            var result = _NodeData.ImportXml(data);
+
+            return Ok(result);
+        }
+
     }
 }
 

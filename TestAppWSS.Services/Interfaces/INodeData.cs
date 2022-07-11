@@ -18,5 +18,9 @@ namespace TestAppWSS.Services.Interfaces
 
         public string GeneratePath(Node node);
 
+        public byte[] ExportXml();
+
+        public bool ImportXml(byte[] array);
+
     }
 }
